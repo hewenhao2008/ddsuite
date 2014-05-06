@@ -1,0 +1,41 @@
+#!/bin/sh
+echo Content-type: text/html
+echo ""
+
+CONF=/etc/ddsuite/ddsuite.conf
+
+urldecode(){
+  echo -e "$(sed 's/+/ /g; s/%/\\x/g')"
+}
+
+#echo "$QUERY_STRING" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
+#echo "STA_SSID=%22+%C3%B6+%22&STA_KEY=1232131" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
+echo "$QUERY_STRING" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
+. /tmp/ddsuite.conf
+
+echo "" > $CONF
+
+if ! test x$STA_SSID = x; then
+  STA_SSID=`echo $STA_SSID|urldecode`
+  echo "STA_SSID=$STA_SSID" >> $CONF
+fi
+
+if ! test x$STA_KEY = x; then
+  STA_KEY=`echo $STA_KEY|urldecode`
+  echo "STA_KEY=$STA_KEY" >> $CONF
+fi
+
+if ! test x$DEV_NAME = x; then
+  DEV_NAME=`echo $DEV_NAME|urldecode`
+  echo "DEV_NAME=$DEV_NAME" >> $CONF
+fi
+
+if ! test x$DEV_PIN = x; then
+  DEV_PIN=`echo $DEV_PIN|urldecode`
+  echo "DEV_PIN=$DEV_PIN" >> $CONF
+fi
+
+echo "{}"
+
+
+
