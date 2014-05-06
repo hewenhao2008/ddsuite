@@ -31,6 +31,7 @@ define Package/ddsuite/install
 	$(INSTALL_DIR) $(1)/bin/
 	$(INSTALL_DIR) $(1)/etc/ddsuite/
 	$(INSTALL_BIN) ./files/wifi_sta $(1)/bin/wifi_sta
+	$(INSTALL_BIN) ./files/rsync_music $(1)/bin/rsync_music
 	$(INSTALL_CONF) ./files/conf.tmpl $(1)/etc/ddsuite/conf.tmpl
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/ddsuite.init $(1)/etc/init.d/ddsuite

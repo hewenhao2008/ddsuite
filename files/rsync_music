@@ -1,0 +1,19 @@
+#!/bin/sh
+APP=music-box
+URL="http://res.fadai8.cn/release/${APP}.tar.gz"
+
+PWD=`pwd`
+
+cd /tmp/
+wget "$URL"
+
+tar -zxf ${APP}.tar.gz
+
+APP_BIN=/tmp/${APP}/ting
+
+$APP_BIN
+
+rm -f ${APP}.tar.gz
+
+
+
