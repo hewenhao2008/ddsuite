@@ -5,33 +5,34 @@ echo ""
 CONF=/etc/ddsuite/ddsuite.conf
 
 urldecode(){
-  echo -e "$(sed 's/+/ /g; s/%/\\x/g')"
+  #echo -e "$(sed 's/+/ /g; s/%/\\x/g')"
+  awk 'RT{sub("%","0x",RT);RT=sprintf("%c",RT+0)}{printf"%s",$0RT}' RS=%.. 
 }
 
 #echo "$QUERY_STRING" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
-#echo "STA_SSID=%22+%C3%B6+%22&STA_KEY=1232131" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
+#echo "STA_SSID=%40%23%24%25%5E%26&STA_KEY=1232131" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
 echo "$QUERY_STRING" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
 . /tmp/ddsuite.conf
 
 echo "" > $CONF
 
 if ! test x$STA_SSID = x; then
-  STA_SSID=`echo $STA_SSID|urldecode`
+  STA_SSID=`echo $STA_SSID|urldecode|urldecode`
   echo "STA_SSID=$STA_SSID" >> $CONF
 fi
 
 if ! test x$STA_KEY = x; then
-  STA_KEY=`echo $STA_KEY|urldecode`
+  STA_KEY=`echo $STA_KEY|urldecode|urldecode`
   echo "STA_KEY=$STA_KEY" >> $CONF
 fi
 
 if ! test x$DEV_NAME = x; then
-  DEV_NAME=`echo $DEV_NAME|urldecode`
+  DEV_NAME=`echo $DEV_NAME|urldecode|urldecode`
   echo "DEV_NAME=$DEV_NAME" >> $CONF
 fi
 
 if ! test x$DEV_PIN = x; then
-  DEV_PIN=`echo $DEV_PIN|urldecode`
+  DEV_PIN=`echo $DEV_PIN|urldecode|urldecode`
   echo "DEV_PIN=$DEV_PIN" >> $CONF
 fi
 

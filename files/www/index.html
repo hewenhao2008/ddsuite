@@ -56,7 +56,7 @@
       $.ajax({
         url: '/cgi-bin/save',
         type: 'GET',
-        data: {STA_SSID: ssid, STA_KEY:encodeURIComponent(ssid_key), DEV_NAME:encodeURIComponent(dev_name), DEV_PIN:encodeURIComponent(dev_pin)},
+        data: {STA_SSID: encodeURIComponent(ssid), STA_KEY:encodeURIComponent(ssid_key), DEV_NAME:encodeURIComponent(dev_name), DEV_PIN:encodeURIComponent(dev_pin)},
       })
       .done(function() {
         $("#div_form").css('display', 'none');
