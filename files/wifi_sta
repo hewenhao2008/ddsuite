@@ -23,7 +23,7 @@ change_to_sta(){
     uci set wireless.@wifi-iface[0].key=
     wifi up
   else
-    /root/rsync_music
+    /bin/rsync_music
   fi
 }
 
