@@ -72,6 +72,52 @@ action_upgrade(){
   fi
 }
 
+action_wifi_sta(){
+  CONF=/etc/ddsuite/ddsuite.conf
+  if [ -e $CONF ]; then
+    echo "ddsuite.conf is exist"
+    . $CONF
+    echo $STA_SSID $STA_KEY
+    wifi down
+    uci set wireless.@wifi-iface[0].network=wan
+    uci set wireless.@wifi-iface[0].mode=sta
+    uci set wireless.@wifi-iface[0].encryption=psk-mixed
+    uci set wireless.@wifi-iface[0].ssid=$STA_SSID
+    uci set wireless.@wifi-iface[0].key=$STA_KEY
+    wifi up
+    TICK=10
+    GATEWAY=
+    while : ; do
+      GATEWAY=`route -e|grep default|awk '{print $2}'`
+      TICK=$(( $TICK - 1))
+      if ! test x$GATEWAY = x; then
+         echo "default gateway: $GATEWAY"
+         break;
+      fi
+      if [ "$TICK" -eq 0 ]; then
+        echo "default gateway timeout!"
+        break;
+      fi
+      sleep 1
+    done
+    if test x${GATEWAY} = x; then
+      echo "failed to change sta mode!"
+      MAC456=`cat /sys/class/ieee80211/phy0/macaddress|awk -F ':' '{print $4$5$6}'`
+      wifi down
+      uci set wireless.@wifi-iface[0].network=lan
+      uci set wireless.@wifi-iface[0].mode=ap
+      uci set wireless.@wifi-iface[0].encryption=none
+      uci set wireless.@wifi-iface[0].ssid=musicbox-$MAC456
+      uci set wireless.@wifi-iface[0].key=
+      wifi up
+    else
+      action_rsync
+    fi
+  else
+    echo "ddsuite.conf NOT exist"
+  fi
+}
+
 case $1 in
   rsync)
     action_rsync
@@ -79,7 +125,10 @@ case $1 in
   upgrade)
     action_upgrade
     ;;
+  wifi_sta)
+    action_wifi_sta
+    ;;
   *)
-  echo "usage: ddsuite rsync | upgrade"
+  echo "usage: ddsuite rsync | upgrade | wifi_sta"
   ;;
 esac

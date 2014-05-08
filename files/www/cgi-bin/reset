@@ -1,0 +1,9 @@
+#!/bin/sh
+echo Content-type: text/html
+echo ""
+
+mtd -r erase rootfs_data
+reboot -f
+echo "reset factory mode..."
+
+

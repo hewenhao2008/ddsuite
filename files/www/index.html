@@ -87,6 +87,22 @@
       });
       
     });
+    $("#reset_dev").bind('click', function(event){
+      $.ajax({
+        url: '/cgi-bin/reset',
+        type: 'GET',
+        data: {param1: 'value1'},
+      })
+      .done(function() {
+        console.log("success");
+      })
+      .fail(function() {
+        console.log("error");
+      })
+      .always(function() {
+        console.log("complete");
+      });
+    });
   })
   </script>
 </head>
@@ -113,6 +129,9 @@
     <div id="div_reboot" style="display:none">
       <p>保存成功</p>
       <input type="button" value="重启设备" id="reboot_dev"/>
+    </div>
+    <div id="div_reset_factory">
+      <input type="button" value="恢复出厂模式" id="reset_dev"/>
     </div>
   </div>
   <!-- END CONTENT -->

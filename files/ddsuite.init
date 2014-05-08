@@ -3,11 +3,11 @@
 
 START=50
 
-DDSUITE_BIN="/bin/wifi_sta"
+DDSUITE_BIN="/bin/ddsuite"
 
 start() {
 	config_load ddsuite
-	$DDSUITE_BIN
+	$DDSUITE_BIN wifi_sta > /tmp/ddsuite.log
 }
 
 stop() {
