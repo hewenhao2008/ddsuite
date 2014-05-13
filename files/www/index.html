@@ -30,9 +30,36 @@
   .mlabel{
     font-size: .8em;
   }
+  #progress-outer {
+      background: #333;
+      -webkit-border-radius: 13px;
+      height: 20px;
+      width: 280px;
+      padding: 3px;
+  }
+
+  #progress-inner {
+      background: orange;
+      width: 0%;
+      height: 100%;
+      -webkit-border-radius: 9px;
+  }
   </style>
   <script type="text/javascript">
   $(function(){
+    var inner = $("#progress-inner");
+    var inner_max = $("#progress-outer").width();
+    var ist = null;
+    function show_progress(){
+      var inner_width = inner.width();
+      inner_width++;
+      inner.width(inner_width);
+      if(inner_width >= inner_max){
+        var ssid = $("#div_form form select option:selected").text();
+        clearInterval(ist);
+        $("#wait_text").text("请回到WiFi:'"+ ssid +"',浏览http://m.fadai8.cn");
+      }
+    }
     function rescan_wifi(){
       var select = $("#div_form form select");
       select.children().remove();
@@ -77,6 +104,9 @@
         data: {param1: 'value1'},
       })
       .done(function() {
+        $("#div_reboot").css('display', 'none');
+        $("#div_wait").css('display', 'inline-block');
+        ist = setInterval(show_progress, 150);
         console.log("success");
       })
       .fail(function() {
@@ -133,12 +163,16 @@
       <p>保存成功</p>
       <input type="button" value="重启设备" id="reboot_dev"/>
     </div>
+    <div id="div_wait" style="display:none">
+      <p id="wait_text" style="font-size:.8em;">正在重启</p>
+      <p><div id="progress-outer"><div id="progress-inner"></div></div></p>
+    </div>
   </div>
   <!-- END CONTENT -->
 
   <!-- FOOTER -->
   <div class="footer">
-    <a href="http://music.fadai8.cn">http://music.fadai8.cn</a>
+    音乐盒子
   </div>
   <!-- END FOOTER -->
 </body>
