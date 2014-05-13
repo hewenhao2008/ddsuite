@@ -57,7 +57,7 @@
       if(inner_width >= inner_max){
         var ssid = $("#div_form form select option:selected").text();
         clearInterval(ist);
-        $("#wait_text").text("请回到WiFi:'"+ ssid +"',浏览http://m.fadai8.cn");
+        $("#wait_text").html("请回到WiFi:'"+ ssid +"',浏览<a href='http://m.fadai8.cn'>http://m.fadai8.cn</a>");
       }
     }
     function rescan_wifi(){
