@@ -36,7 +36,8 @@ action_rsync(){
     echo "UNKNOWN BOARD"
     exit 1
   fi
-  QUERY="http://music.fadai8.cn/api/package?$BOARD"
+  VERSION=`uci get ddsuite.main.version`
+  QUERY="http://music.fadai8.cn/api/package?$BOARD&version=${VERSION}"
   # echo $QUERY
   SRC_URL=`wget -q -O- $QUERY`
   if ! test x$SRC_URL = x; then
@@ -77,13 +78,18 @@ action_wifi_sta(){
   if [ -e $CONF ]; then
     echo "ddsuite.conf is exist"
     . $CONF
-    echo $STA_SSID $STA_KEY
+    echo $STA_SSID $STA_KEY $STA_ENC
     wifi down
     uci set wireless.@wifi-iface[0].network=wan
     uci set wireless.@wifi-iface[0].mode=sta
-    uci set wireless.@wifi-iface[0].encryption=psk-mixed
+    if test $STA_ENC = "on"; then
+      uci set wireless.@wifi-iface[0].encryption=psk-mixed
+      uci set wireless.@wifi-iface[0].key=$STA_KEY
+    else
+      uci set wireless.@wifi-iface[0].encryption=none
+      uci set wireless.@wifi-iface[0].key=
+    fi
     uci set wireless.@wifi-iface[0].ssid=$STA_SSID
-    uci set wireless.@wifi-iface[0].key=$STA_KEY
     wifi up
     TICK=15
     GATEWAY=

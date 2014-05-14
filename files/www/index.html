@@ -65,25 +65,26 @@
       select.children().remove();
       $.getJSON('/cgi-bin/wifi_scan', null, function(json, textStatus){
         $.each(json, function(index, v) {
-          var op = $('<option value="'+v+'">'+v+'</option>');
+          var op = $('<option value="'+v.enc+'">'+v.ssid+'</option>');
           op.appendTo(select);
         });
-      });      
+      });
     }
     rescan_wifi();
     $("#rescan_wifi").bind('click', function(event){
       rescan_wifi();
     });
     $("#save_config").bind('click', function(event){
-      var ssid = $("#div_form form select option:selected").text();
+      var opt = $("#div_form form select option:selected");
+      var ssid = opt.text();
+      var enc = opt.val();
       var ssid_key = $("#input_ssid_key").val();
-      var dev_name = $("#input_dev_name").val();
       var dev_pin = $("#input_dev_pin").val();
-      console.log(ssid, ssid_key, dev_name, dev_pin);
+      console.log(ssid, enc, ssid_key, dev_pin);
       $.ajax({
         url: '/cgi-bin/save',
         type: 'GET',
-        data: {STA_SSID: encodeURIComponent(ssid), STA_KEY:encodeURIComponent(ssid_key), DEV_NAME:encodeURIComponent(dev_name), DEV_PIN:encodeURIComponent(dev_pin)},
+        data: {STA_ENC:encodeURIComponent(enc), STA_SSID: encodeURIComponent(ssid), STA_KEY:encodeURIComponent(ssid_key), DEV_PIN:encodeURIComponent(dev_pin)},
       })
       .done(function() {
         $("#div_form").css('display', 'none');
@@ -154,8 +155,7 @@
         <select name="ssids">
         </select><br>
         <input class="form-control" name="ssid_key" id="input_ssid_key" type="text" placeholder="WiFi 密码"><br><br>
-        <input class="form-control" name="dev_name" id="input_dev_name" type="text" placeholder="音乐盒名称"><br>
-        <input class="form-control" name="dev_pin" id="input_dev_pin" type="text" placeholder="6位数字"><br>
+        <input class="form-control" name="dev_pin" id="input_dev_pin" type="text" placeholder="绑定码"><br>
         <input type="button" value="保存设置" id="save_config"/>
       </form>
     </div>

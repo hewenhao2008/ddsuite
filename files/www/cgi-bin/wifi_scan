@@ -2,7 +2,29 @@
 echo Content-type: text/html
 echo ""
 
-SSIDS=`iw dev wlan0 scan|grep "SSID:"|awk -F ': ' 'NR > 1 {printf(", ")} {printf("\"%s\"", $2)}'`
-echo "[$SSIDS]"
+SSIDS=$(iwlist wlan0 scanning | grep Encryption -A 1 | awk '
+BEGIN {
+  FS=":";
+  i=0;
+  printf("[")
+}
+{
+  if(NF>1){
+    i++;
+    if(i > 2 && i%2){
+      printf(",");
+    }
+
+    if(i%2){
+      printf("{\"enc\":\"%s\",",$2);
+    }else{
+      printf("\"ssid\":%s}",$2);
+    }
+  }
+}
+END{
+  printf("]");
+}')
+echo $SSIDS
 
 

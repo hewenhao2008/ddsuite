@@ -14,7 +14,12 @@ urldecode(){
 echo "$QUERY_STRING" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
 . /tmp/ddsuite.conf
 
-echo "" > $CONF
+echo -e "" > $CONF
+
+if ! test x$STA_ENC = x; then
+  STA_ENC=`echo $STA_ENC|urldecode|urldecode`
+  echo "STA_ENC=$STA_ENC" >> $CONF
+fi
 
 if ! test x$STA_SSID = x; then
   STA_SSID=`echo $STA_SSID|urldecode|urldecode`
@@ -24,12 +29,11 @@ fi
 if ! test x$STA_KEY = x; then
   STA_KEY=`echo $STA_KEY|urldecode|urldecode`
   echo "STA_KEY=$STA_KEY" >> $CONF
+else
+  echo "STA_KEY=null" >> $CONF  
 fi
 
-if ! test x$DEV_NAME = x; then
-  DEV_NAME=`echo $DEV_NAME|urldecode|urldecode`
-  echo "DEV_NAME=$DEV_NAME" >> $CONF
-fi
+echo "DEV_UUID=null" >> $CONF
 
 if ! test x$DEV_PIN = x; then
   DEV_PIN=`echo $DEV_PIN|urldecode|urldecode`
