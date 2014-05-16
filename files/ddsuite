@@ -83,7 +83,7 @@ action_wifi_sta(){
     uci set wireless.@wifi-iface[0].network=wan
     uci set wireless.@wifi-iface[0].mode=sta
     if test $STA_ENC = "on"; then
-      uci set wireless.@wifi-iface[0].encryption=psk-mixed
+      uci set wireless.@wifi-iface[0].encryption=mixed-psk
       uci set wireless.@wifi-iface[0].key=$STA_KEY
     else
       uci set wireless.@wifi-iface[0].encryption=none
@@ -91,9 +91,11 @@ action_wifi_sta(){
     fi
     uci set wireless.@wifi-iface[0].ssid=$STA_SSID
     wifi up
+    uci export wireless
     TICK=15
     GATEWAY=
     while : ; do
+      sleep 1
       GATEWAY=`route -e|grep default|awk '{print $2}'`
       TICK=$(( $TICK - 1))
       if ! test x$GATEWAY = x; then
@@ -104,7 +106,6 @@ action_wifi_sta(){
         echo "default gateway timeout!"
         break;
       fi
-      sleep 1
     done
     if test x${GATEWAY} = x; then
       echo "failed to change sta mode!"
