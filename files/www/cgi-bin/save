@@ -11,33 +11,33 @@ urldecode(){
 
 #echo "$QUERY_STRING" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
 #echo "STA_SSID=%40%23%24%25%5E%26&STA_KEY=1232131" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
-echo "$QUERY_STRING" | awk '{split($0, a, "&"); for(i in a)print(a[i]);}' > /tmp/ddsuite.conf
+echo "$QUERY_STRING" | awk '{split($0, a, "&"); for(i in a){split(a[i], r, "="); printf("%s=\"%s\"\n", r[1], r[2]);}}' > /tmp/ddsuite.conf
 . /tmp/ddsuite.conf
 
 echo -e "" > $CONF
 
 if ! test x$STA_ENC = x; then
   STA_ENC=`echo $STA_ENC|urldecode|urldecode`
-  echo "STA_ENC=$STA_ENC" >> $CONF
+  echo "STA_ENC=\"$STA_ENC\"" >> $CONF
 fi
 
 if ! test x$STA_SSID = x; then
   STA_SSID=`echo $STA_SSID|urldecode|urldecode`
-  echo "STA_SSID=$STA_SSID" >> $CONF
+  echo "STA_SSID=\"$STA_SSID\"" >> $CONF
 fi
 
 if ! test x$STA_KEY = x; then
   STA_KEY=`echo $STA_KEY|urldecode|urldecode`
-  echo "STA_KEY=$STA_KEY" >> $CONF
+  echo "STA_KEY=\"$STA_KEY\"" >> $CONF
 else
-  echo "STA_KEY=null" >> $CONF  
+  echo "STA_KEY=\"null\"" >> $CONF  
 fi
 
-echo "DEV_UUID=null" >> $CONF
+echo "DEV_UUID=\"null\"" >> $CONF
 
 if ! test x$DEV_PIN = x; then
   DEV_PIN=`echo $DEV_PIN|urldecode|urldecode`
-  echo "DEV_PIN=$DEV_PIN" >> $CONF
+  echo "DEV_PIN=\"$DEV_PIN\"" >> $CONF
 fi
 
 echo "{}"

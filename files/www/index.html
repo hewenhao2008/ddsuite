@@ -47,6 +47,10 @@
   </style>
   <script type="text/javascript">
   $(function(){
+    function save_quote(v){
+      var r = v.replace(/"/g,"\\\"");
+      return r;
+    }
     var inner = $("#progress-inner");
     var inner_max = $("#progress-outer").width();
     var ist = null;
@@ -76,10 +80,10 @@
     });
     $("#save_config").bind('click', function(event){
       var opt = $("#div_form form select option:selected");
-      var ssid = opt.text();
-      var enc = opt.val();
-      var ssid_key = $("#input_ssid_key").val();
-      var dev_pin = $("#input_dev_pin").val();
+      var ssid = save_quote(opt.text());
+      var enc = save_quote(opt.val());
+      var ssid_key = save_quote($("#input_ssid_key").val());
+      var dev_pin = save_quote($("#input_dev_pin").val());
       console.log(ssid, enc, ssid_key, dev_pin);
       $.ajax({
         url: '/cgi-bin/save',

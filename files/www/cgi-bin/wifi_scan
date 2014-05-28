@@ -2,29 +2,144 @@
 echo Content-type: text/html
 echo ""
 
-SSIDS=$(iwlist wlan0 scanning | grep Encryption -A 1 | awk '
+SSIDS=$(iwlist wlan0 scanning | awk '
 BEGIN {
-  FS=":";
-  i=0;
-  printf("[")
+  count = 0;
+  SSID = "N/A";
+  ENC = "N/A";
+  W2 = "N/A";
+  W1 = "N/A";
+  WPA = 0;
+  WPA2 = 0;
+  printf("[");
+}
+function record(s, e, w2, w1){
+  id = "";
+  enc = "";
+  type = "N/A";
+  split(s,a,":");
+  id = a[2];
+  split(e,a,":");
+  enc = a[2];
+  if (enc == "on"){
+    type = "WEP";
+    ccmp = 0;
+    tkip = 0;
+    psk2 = 0;
+    psk1 = 0;
+    split(w2,a,":");
+    if(a[2]){      
+      split(a[2], r, " ");
+      if(r[1] == "CCMP")
+        ccmp = 1;
+      if(r[1] == "TKIP")
+        tkip = 1;
+      if(r[2] == "CCMP")
+        ccmp = 1;
+      if(r[2] == "TKIP")
+        tkip = 1;
+      psk2 = a[2];
+    }
+    split(w1,a,":");
+    if(a[2]){
+      split(a[2], r, " ");
+      if(r[1] == "CCMP")
+        ccmp = 1;
+      if(r[1] == "TKIP")
+        tkip = 1;
+      if(r[2] == "CCMP")
+        ccmp = 1;
+      if(r[2] == "TKIP")
+        tkip = 1;
+      psk1 = a[2];
+    }
+    if (psk1 != 0 && psk2 != 0){
+      type = "mixed-psk";
+      if(tkip)
+        type =(type"+tkip");
+      if(ccmp)
+        type =(type"+ccmp");
+    }else if(psk1 == 0 && psk2 != 0){
+      type = "psk2";
+      if(tkip)
+        type =(type"+tkip");
+      if(ccmp)
+        type =(type"+ccmp");
+    }else if(psk1 != 0 && psk2 == 0){
+      type = "psk";
+      if(tkip)
+        type =(type"+tkip");
+      if(ccmp)
+        type =(type"+ccmp");
+    }
+  }
+  count++;
+  if(count>1) print ","
+  printf("{\"ssid\":%s,\"enc\":\"%s\", \"type\":\"%s\"}", id, enc, type);
 }
 {
-  if(NF>1){
-    i++;
-    if(i > 2 && i%2){
-      printf(",");
+  match($0, /Cell ([0-9]+) - Address:/);
+  if(RLENGTH != -1){
+    if(SSID != "N/A"){
+      record(SSID, ENC, W2, W1);
     }
+    SSID = "N/A";
+    ENC = "N/A";
+    W2 = "N/A";
+    W1 = "N/A";
+    WPA = 0;
+    WPA2 = 0;
+  }
+}
+{
+  match($0, /ESSID:"(.+)"/);
+  if(RLENGTH != -1)
+    SSID=$0;
+}
+{
+  match($0, /Encryption key:(.+)/);
+  if(RLENGTH != -1)
+    ENC=$0;
+}
+{
+  match($0, /IE: IEEE 802.11i\/WPA2 Version 1/);
+  if(RLENGTH != -1){
+    WPA2=1;
+  }
+  match($0, /IE: WPA Version 1/);
+  if(RLENGTH != -1){
+    WPA=1;
+  }
+}
+{
+  match($0, /Pairwise Ciphers(.+)/);
+  if(RLENGTH != -1){
+    if(WPA2==1){
+      W2=$0;
+    }
+    if(WPA==1){
+      W1=$0;
+    }    
+  }
+}
 
-    if(i%2){
-      printf("{\"enc\":\"%s\",",$2);
-    }else{
-      printf("\"ssid\":%s}",$2);
-    }
+{
+  match($0, /Authentication Suites \(1\) : PSK/);
+  if(RLENGTH != -1 && WPA2==1){
+    WPA2=0;
+  }
+  if(RLENGTH != -1 && WPA==1){
+    WPA=0;
   }
 }
 END{
+  if(SSID != "N/A"){
+    record(SSID, ENC, W2, W1);
+  }  
   printf("]");
-}')
+}
+')
+
 echo $SSIDS
 
 
