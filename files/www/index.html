@@ -47,6 +47,7 @@
   </style>
   <script type="text/javascript">
   $(function(){
+    var __DEV_UUID__ = "null";
     function save_quote(v){
       var r = v.replace(/"/g,"\\\"");
       return r;
@@ -68,10 +69,14 @@
       var select = $("#div_form form select");
       select.children().remove();
       $.getJSON('/cgi-bin/wifi_scan', null, function(json, textStatus){
-        $.each(json, function(index, v) {
+        $.each(json.ssids, function(index, v) {
           var op = $('<option value="'+v.enc+'">'+v.ssid+'</option>');
           op.appendTo(select);
         });
+        if(json.dev.uuid){
+          __DEV_UUID__ = json.dev.uuid;
+          $("#input_dev_pin").val(json.dev.uuid);
+        }
       });
     }
     rescan_wifi();
@@ -84,11 +89,12 @@
       var enc = save_quote(opt.val());
       var ssid_key = save_quote($("#input_ssid_key").val());
       var dev_pin = save_quote($("#input_dev_pin").val());
+      var uuid = save_quote(__DEV_UUID__);
       console.log(ssid, enc, ssid_key, dev_pin);
       $.ajax({
         url: '/cgi-bin/save',
         type: 'GET',
-        data: {STA_ENC:encodeURIComponent(enc), STA_SSID: encodeURIComponent(ssid), STA_KEY:encodeURIComponent(ssid_key), DEV_PIN:encodeURIComponent(dev_pin)},
+        data: {STA_ENC:encodeURIComponent(enc), STA_SSID: encodeURIComponent(ssid), STA_KEY:encodeURIComponent(ssid_key), DEV_UUID:encodeURIComponent(uuid), DEV_PIN:encodeURIComponent(dev_pin)},
       })
       .done(function() {
         $("#div_form").css('display', 'none');

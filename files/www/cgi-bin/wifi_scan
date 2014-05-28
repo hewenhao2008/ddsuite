@@ -140,6 +140,17 @@ END{
 }
 ')
 
-echo $SSIDS
+
+DDCONF="/etc/ddsuite/ddsuite.conf"
+DEV="{}"
+
+if [ -f $DDCONF ]; then
+  . $DDCONF
+  DEV="{\"uuid\":\"$DEV_UUID\", \"pin\":\"$DEV_PIN\"}"
+fi
+
+RES="{\"ssids\":$SSIDS, \"dev\":$DEV}"
+
+echo $RES
 
 

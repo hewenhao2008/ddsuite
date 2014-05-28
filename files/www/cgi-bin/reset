@@ -2,7 +2,7 @@
 echo Content-type: text/html
 echo ""
 
-mtd -r erase rootfs_data
+firstboot
 reboot -f
 echo "reset factory mode..."
 
