@@ -90,7 +90,11 @@
       var ssid_key = save_quote($("#input_ssid_key").val());
       var dev_pin = save_quote($("#input_dev_pin").val());
       var uuid = save_quote(__DEV_UUID__);
-      console.log(ssid, enc, ssid_key, dev_pin);
+      var uuid_checked = $("#input_dev_checkbox").prop("checked");
+      if(uuid_checked){
+        uuid = dev_pin;
+      }
+      console.log(ssid, enc, ssid_key, uuid, dev_pin);
       $.ajax({
         url: '/cgi-bin/save',
         type: 'GET',
@@ -161,11 +165,12 @@
   <div class="content">
     <div id="div_form">
       <form>
-        <label class="mlabel">选择WiFi接入点</label><button type="button" id="rescan_wifi">扫描</button><br>
+        <label class="mlabel">选择WiFi接入点</label><button type="button" id="rescan_wifi">扫描</button><br />
         <select name="ssids">
-        </select><br>
-        <input class="form-control" name="ssid_key" id="input_ssid_key" type="text" placeholder="WiFi 密码"><br><br>
-        <input class="form-control" name="dev_pin" id="input_dev_pin" type="text" placeholder="绑定码"><br>
+        </select><br />
+        <input class="form-control" name="ssid_key" id="input_ssid_key" type="text" placeholder="WiFi 密码" /><br /><br />
+        <input class="form-control" name="dev_pin" id="input_dev_pin" type="text" placeholder="绑定码"/><br />
+        设置UUID: <input type="checkbox" name="uuid" id="input_dev_checkbox" /><br />
         <input type="button" value="保存设置" id="save_config"/>
       </form>
     </div>
