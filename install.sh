@@ -17,6 +17,7 @@ create_ddsuite_conf(){
   echo "create default ddsuite conf"
   local CONF="/etc/ddsuite/ddsuite.conf"
   mkdir -p "/etc/ddsuite"
+  echo "online help: http://m.fadai8.cn/help.html"
   printf "Enter DEV_UUID:(tg22321)"
   read DEV_UUID
 cat <<END>${CONF}
@@ -46,60 +47,68 @@ END
   fi
 }
 
-create_boot_launch_sh(){
+install_ddmusic_service(){
   echo "create boot launch bash"
-  local SH="/root/ddsuite"
+  local SH="/etc/init.d/ddmusic"
 cat <<END>${SH}
-#!/bin/sh
-# this is boot run bash for ddsuite
-download_and_run(){
-  APP=music-box
-  URL=\$1
-  PWD=`pwd`
+#!/bin/sh /etc/rc.common
+######################################
+# this is ddmusic service bash
+######################################
+START=60
+TING=/tmp/music-box/ting
 
-  cd /tmp/
-  wget "\$URL" -O \${APP}.tar.gz
-  tar -zxf \${APP}.tar.gz
-  APP_BIN=/tmp/\${APP}/ting
-  \$APP_BIN
-  rm -f \${APP}.tar.gz
-  cd \$PWD
+download_ddmusic(){
+  local URL=\$1
+  local PWD=\`pwd\`
+  if ! [ -x \$TING ]; then
+    cd /tmp/
+    wget "\$URL" -O - | tar -zx
+    cd \$PWD
+  fi
 }
 
-action_rsync(){
-  BOARD=`cat /proc/cmdline|awk '{print \$1}'`
+start(){
+  local BOARD=\`cat /proc/cmdline|awk '{print \$1}'\`
   if test x\$BOARD = x; then
-    BOARD=`dmesg |grep Kernel|awk '{print \$6}'`
+    BOARD=\`dmesg |grep Kernel|awk '{print \$6}'\`
   fi
   if test x\$BOARD = x; then
     echo "UNKNOWN BOARD"
     exit 1
   fi
-  VERSION="2.0.0"
-  QUERY="http://music.fadai8.cn/api/package?\$BOARD&version=\${VERSION}"
+  local VERSION="2.0.0"
+  local QUERY="http://m.fadai8.cn/api/package?\$BOARD&version=\${VERSION}"
   # echo \$QUERY
-  SRC_URL=\`wget -q -O- \$QUERY\`
+  local SRC_URL=\`wget -q -O- \$QUERY\`
   if ! test x\$SRC_URL = x; then
     echo \$SRC_URL
     if test \$SRC_URL = "N/A"; then
       echo "NOT support this board!"
       exit 1
     fi
-    download_and_run \$SRC_URL
+    download_ddmusic \$SRC_URL
+    if [ -x \$TING ]; then
+      \$TING start
+    fi
   fi
 }
 
-case \$1 in
-  *)
-    action_rsync
-    ;;
-esac
+stop(){
+  if [ -x \$TING ]; then
+    \$TING stop
+  fi
+}
 END
   chmod +x ${SH}
-  echo "LAST thing!add '/root/ddsuite' to /etc/rc.local"
+  /etc/init.d/ddmusic enable
+  echo "enable ddmusic service"
+  echo "please reboot device."
 }
 
 install_opkg_ipks
 create_ddsuite_conf
 add_firmware_rule
-create_boot_launch_sh
+install_ddmusic_service
+
+
