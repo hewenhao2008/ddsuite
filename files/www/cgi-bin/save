@@ -41,6 +41,8 @@ fi
 if ! test x$DEV_PIN = x; then
   DEV_PIN=`echo $DEV_PIN|urldecode|urldecode`
   echo "DEV_PIN=\"$DEV_PIN\"" >> $CONF
+else
+  echo "DEV_PIN=\"null\"" >> $CONF
 fi
 
 echo "{}"
