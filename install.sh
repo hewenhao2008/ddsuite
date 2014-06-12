@@ -18,7 +18,7 @@ create_ddsuite_conf(){
   local CONF="/etc/ddsuite/ddsuite.conf"
   mkdir -p "/etc/ddsuite"
   echo "online help: http://m.fadai8.cn/help.html"
-  printf "Enter DEV_UUID:(tg22321)"
+  printf "Enter DEV_UUID:"
   read DEV_UUID
 cat <<END>${CONF}
 STA_ENC=off

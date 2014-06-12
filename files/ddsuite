@@ -184,7 +184,7 @@ action_rsync(){
     exit 1
   fi
   VERSION=`uci get ddsuite.main.version`
-  QUERY="http://music.fadai8.cn/api/package?$BOARD&version=${VERSION}"
+  QUERY="http://m.fadai8.cn/api/package?$BOARD&version=${VERSION}"
   # echo $QUERY
   SRC_URL=`wget -q -O- $QUERY`
   if ! test x$SRC_URL = x; then
@@ -207,7 +207,7 @@ action_upgrade(){
     exit 1
   fi
   VERSION=`uci get ddsuite.main.version`
-  QUERY="http://music.fadai8.cn/api/image?$BOARD&version=${VERSION}"
+  QUERY="http://m.fadai8.cn/api/image?$BOARD&version=${VERSION}"
   # echo $QUERY
   SRC_URL=`wget -q -O- $QUERY`
   if ! test x$SRC_URL = x; then
