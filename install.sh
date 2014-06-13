@@ -17,7 +17,7 @@ create_ddsuite_conf(){
   echo "create default ddsuite conf"
   local CONF="/etc/ddsuite/ddsuite.conf"
   mkdir -p "/etc/ddsuite"
-  echo "online help: http://m.fadai8.cn/help.html"
+  echo "online help: http://m.jdodo.cn/help.html"
   printf "Enter DEV_UUID:"
   read DEV_UUID
 cat <<END>${CONF}
@@ -78,7 +78,7 @@ start(){
     exit 1
   fi
   local VERSION="2.0.0"
-  local QUERY="http://m.fadai8.cn/api/package?\$BOARD&version=\${VERSION}"
+  local QUERY="http://m.jdodo.cn/api/package?\$BOARD&version=\${VERSION}"
   # echo \$QUERY
   local SRC_URL=\`wget -q -O- \$QUERY\`
   if ! test x\$SRC_URL = x; then

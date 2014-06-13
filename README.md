@@ -9,13 +9,13 @@ usage:
  make
 
 # install ddmusic with openwrt-frimware
-obtain dev_uuid from http://m.fadai8.cn/obtain_dev_uuid.html
+obtain dev_uuid from http://m.jdodo.cn/obtain_dev_uuid.html
 telnet/ssh the router wr703n
 cd /tmp/
 wget "http://downloads.openwrt.org/attitude_adjustment/12.09/ar71xx/generic/openwrt-ar71xx-generic-tl-wr703n-v1-squashfs-factory.bin"
 mtd -r write openwrt-ar71xx-generic-tl-wr703n-v1-squashfs-factory.bin firmware
 cd /tmp/
-wget "http://res.fadai8.cn/release/install.sh"
+wget "http://res.jdodo.cn/release/install.sh"
 chmod +x install.sh
 /tmp/install.sh
 reboot
