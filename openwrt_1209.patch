@@ -23,65 +23,58 @@ index 477c00c..f8266df 100644
  }
 @@ -182,7 +182,6 @@ ucidef_set_interface_wan() {
  
-  uci batch <<EOF
+ 	uci batch <<EOF
  set network.wan='interface'
 -set network.wan.ifname='$ifname'
  set network.wan.proto='dhcp'
  EOF
  }
 diff --git a/package/mac80211/files/lib/wifi/mac80211.sh b/package/mac80211/files/lib/wifi/mac80211.sh
-index 1994ca3..de8e8b9 100644
+index 1994ca3..b6607df 100644
 --- a/package/mac80211/files/lib/wifi/mac80211.sh
 +++ b/package/mac80211/files/lib/wifi/mac80211.sh
 @@ -623,6 +623,7 @@ detect_mac80211() {
-    }
-    iw phy "$dev" info | grep -q '2412 MHz' || { mode_band="a"; channel="36"; }
+ 		}
+ 		iw phy "$dev" info | grep -q '2412 MHz' || { mode_band="a"; channel="36"; }
  
-+   mac456=`cat /sys/class/ieee80211/${dev}/macaddress | awk -F ':' '{print $4$5$6}'`
-    if [ -x /usr/bin/readlink ]; then
-      path="$(readlink -f /sys/class/ieee80211/${dev}/device)"
-      path="${path##/sys/devices/}"
-@@ -630,7 +631,6 @@ detect_mac80211() {
-    else
-      dev_id="  option macaddr  $(cat /sys/class/ieee80211/${dev}/macaddress)"
-    fi
--
-    cat <<EOF
- config wifi-device  radio$devidx
-  option type     mac80211
-@@ -639,13 +639,13 @@ config wifi-device  radio$devidx
++		mac456=`cat /sys/class/ieee80211/${dev}/macaddress | awk -F ':' '{print $4$5$6}'`
+ 		if [ -x /usr/bin/readlink ]; then
+ 			path="$(readlink -f /sys/class/ieee80211/${dev}/device)"
+ 			path="${path##/sys/devices/}"
+@@ -639,13 +640,13 @@ config wifi-device  radio$devidx
  $dev_id
  $ht_capab
-  # REMOVE THIS LINE TO ENABLE WIFI:
-- option disabled 1
-+ option disabled 0
+ 	# REMOVE THIS LINE TO ENABLE WIFI:
+-	option disabled 1
++	option disabled 0
  
  config wifi-iface
-  option device   radio$devidx
-  option network  lan
-  option mode     ap
-- option ssid     OpenWrt
-+ option ssid     musicbox-$mac456
-  option encryption none
+ 	option device   radio$devidx
+ 	option network  lan
+ 	option mode     ap
+-	option ssid     OpenWrt
++	option ssid     musicbox-$mac456
+ 	option encryption none
  
  EOF
 diff --git a/target/linux/ar71xx/base-files/etc/uci-defaults/network b/target/linux/ar71xx/base-files/etc/uci-defaults/network
-index 7fa219d..3722124 100755
+index 7fa219d..9b99293 100755
 --- a/target/linux/ar71xx/base-files/etc/uci-defaults/network
 +++ b/target/linux/ar71xx/base-files/etc/uci-defaults/network
-@@ -158,11 +158,13 @@ tl-mr3020 |\
+@@ -158,11 +158,15 @@ tl-mr3020 |\
  tl-mr3040 |\
  tl-wa901nd |\
  tl-wa901nd-v2 |\
 -tl-wr703n |\
  wp543)
-  ucidef_set_interface_lan "eth0"
-  ;;
--
+ 	ucidef_set_interface_lan "eth0"
+ 	;;
+ 
 +tl-wr703n)
-+ ucidef_set_interface_lan "eth0"
-+ ucidef_set_interface_wan "eth0"
-+ ;;
++	ucidef_set_interface_lan "eth0"
++	ucidef_set_interface_wan "eth0"
++	;;
++
  alfa-ap96 |\
  alfa-nx |\
  ap83 |\
@@ -103,11 +96,11 @@ index 2be6335..89084a6 100644
 --- a/tools/firmware-utils/src/mktplinkfw.c
 +++ b/tools/firmware-utils/src/mktplinkfw.c
 @@ -287,7 +287,7 @@ static struct board_info boards[] = {
-    .id   = "TL-WR703Nv1",
-    .hw_id    = HWID_TL_WR703N_V1,
-    .hw_rev   = 1,
--   .layout_id  = "4Mlzma",
-+   .layout_id  = "8Mlzma",
-  }, {
-    /* terminating entry */
-  }
+ 		.id		= "TL-WR703Nv1",
+ 		.hw_id		= HWID_TL_WR703N_V1,
+ 		.hw_rev		= 1,
+-		.layout_id	= "4Mlzma",
++		.layout_id	= "8Mlzma",
+ 	}, {
+ 		/* terminating entry */
+ 	}

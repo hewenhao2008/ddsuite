@@ -2,7 +2,10 @@
 ddsuite is simple openwrt web-config-ui
 
 usage:
- git apply openwrt_1209.patch
+ cd openwrt_dir
+ git chechout .
+ git apply --check package/ddsuite/openwrt_1029.patch
+ git apply package/ddsuite/openwrt_1029.patch
  cp config_musicbox_wr703n to path_openwrt
  cp the project to openwrt/packages/
  make menucofig add ddsuite
