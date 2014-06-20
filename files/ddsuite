@@ -148,17 +148,21 @@ find_ssid_encryption(){
 }
 
 download_and_run(){
-  APP=music-box
-  URL=$1
-  PWD=`pwd`
-
-  cd /tmp/
-  wget "$URL" -O ${APP}.tar.gz
-  tar -zxf ${APP}.tar.gz
-  APP_BIN=/tmp/${APP}/ting
+  local APP=music-box
+  local URL=$1
+  local PWD=`pwd`
+  local MBOX_TING=/bin/music-box/ting
+  if [ -f ${MBOX_TING} ]; then
+    ln -s /bin/music-box /tmp/music-box
+  else
+    cd /tmp/
+    wget "$URL" -O ${APP}.tar.gz
+    tar -zxf ${APP}.tar.gz
+    rm -f ${APP}.tar.gz
+    cd $PWD
+  fi
+  local APP_BIN=/tmp/${APP}/ting
   $APP_BIN
-  rm -f ${APP}.tar.gz
-  cd $PWD
 }
 
 download_and_flash(){
