@@ -23,7 +23,7 @@ index 477c00c..f8266df 100644
  }
 @@ -182,7 +182,6 @@ ucidef_set_interface_wan() {
  
- 	uci batch <<EOF
+  uci batch <<EOF
  set network.wan='interface'
 -set network.wan.ifname='$ifname'
  set network.wan.proto='dhcp'
@@ -34,35 +34,35 @@ index 1994ca3..de8e8b9 100644
 --- a/package/mac80211/files/lib/wifi/mac80211.sh
 +++ b/package/mac80211/files/lib/wifi/mac80211.sh
 @@ -623,6 +623,7 @@ detect_mac80211() {
- 		}
- 		iw phy "$dev" info | grep -q '2412 MHz' || { mode_band="a"; channel="36"; }
+    }
+    iw phy "$dev" info | grep -q '2412 MHz' || { mode_band="a"; channel="36"; }
  
-+		mac456=`cat /sys/class/ieee80211/${dev}/macaddress | awk -F ':' '{print $4$5$6}'`
- 		if [ -x /usr/bin/readlink ]; then
- 			path="$(readlink -f /sys/class/ieee80211/${dev}/device)"
- 			path="${path##/sys/devices/}"
++   mac456=`cat /sys/class/ieee80211/${dev}/macaddress | awk -F ':' '{print $4$5$6}'`
+    if [ -x /usr/bin/readlink ]; then
+      path="$(readlink -f /sys/class/ieee80211/${dev}/device)"
+      path="${path##/sys/devices/}"
 @@ -630,7 +631,6 @@ detect_mac80211() {
- 		else
- 			dev_id="	option macaddr	$(cat /sys/class/ieee80211/${dev}/macaddress)"
- 		fi
+    else
+      dev_id="  option macaddr  $(cat /sys/class/ieee80211/${dev}/macaddress)"
+    fi
 -
- 		cat <<EOF
+    cat <<EOF
  config wifi-device  radio$devidx
- 	option type     mac80211
+  option type     mac80211
 @@ -639,13 +639,13 @@ config wifi-device  radio$devidx
  $dev_id
  $ht_capab
- 	# REMOVE THIS LINE TO ENABLE WIFI:
--	option disabled 1
-+	option disabled 0
+  # REMOVE THIS LINE TO ENABLE WIFI:
+- option disabled 1
++ option disabled 0
  
  config wifi-iface
- 	option device   radio$devidx
- 	option network  lan
- 	option mode     ap
--	option ssid     OpenWrt
-+	option ssid     musicbox-$mac456
- 	option encryption none
+  option device   radio$devidx
+  option network  lan
+  option mode     ap
+- option ssid     OpenWrt
++ option ssid     musicbox-$mac456
+  option encryption none
  
  EOF
 diff --git a/target/linux/ar71xx/base-files/etc/uci-defaults/network b/target/linux/ar71xx/base-files/etc/uci-defaults/network
@@ -75,13 +75,39 @@ index 7fa219d..3722124 100755
  tl-wa901nd-v2 |\
 -tl-wr703n |\
  wp543)
- 	ucidef_set_interface_lan "eth0"
- 	;;
+  ucidef_set_interface_lan "eth0"
+  ;;
 -
 +tl-wr703n)
-+	ucidef_set_interface_lan "eth0"
-+	ucidef_set_interface_wan "eth0"
-+	;;
++ ucidef_set_interface_lan "eth0"
++ ucidef_set_interface_wan "eth0"
++ ;;
  alfa-ap96 |\
  alfa-nx |\
  ap83 |\
+diff --git a/target/linux/ar71xx/image/Makefile b/target/linux/ar71xx/image/Makefile
+index 9ebe486..26e4e04 100644
+--- a/target/linux/ar71xx/image/Makefile
++++ b/target/linux/ar71xx/image/Makefile
+@@ -875,7 +875,7 @@ $(eval $(call SingleProfile,TPLINK,$(fs_64kraw),TLWR1043,tl-wr1043nd-v1,TL-WR104
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR11U,tl-mr11u-v1,TL-MR11U,ttyATH0,115200,0x00110101,1,4Mlzma))
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR3020,tl-mr3020-v1,TL-MR3020,ttyATH0,115200,0x30200001,1,4Mlzma))
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR3040,tl-mr3040-v1,TL-MR3040,ttyATH0,115200,0x30400001,1,4Mlzma))
+-$(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR703,tl-wr703n-v1,TL-WR703N,ttyATH0,115200,0x07030101,1,4Mlzma))
++$(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR703,tl-wr703n-v1,TL-WR703N,ttyATH0,115200,0x07030101,1,8Mlzma))
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR740NV4,tl-wr740n-v4,TL-WR741ND-v4,ttyATH0,115200,0x07400004,1,4Mlzma))
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR741NV4,tl-wr741nd-v4,TL-WR741ND-v4,ttyATH0,115200,0x07410004,1,4Mlzma))
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR841NV8,tl-wr841n-v8,TL-WR841N-v8,ttyS0,115200,0x08410008,1,4Mlzma))
+diff --git a/tools/firmware-utils/src/mktplinkfw.c b/tools/firmware-utils/src/mktplinkfw.c
+index 2be6335..89084a6 100644
+--- a/tools/firmware-utils/src/mktplinkfw.c
++++ b/tools/firmware-utils/src/mktplinkfw.c
+@@ -287,7 +287,7 @@ static struct board_info boards[] = {
+    .id   = "TL-WR703Nv1",
+    .hw_id    = HWID_TL_WR703N_V1,
+    .hw_rev   = 1,
+-   .layout_id  = "4Mlzma",
++   .layout_id  = "8Mlzma",
+  }, {
+    /* terminating entry */
+  }

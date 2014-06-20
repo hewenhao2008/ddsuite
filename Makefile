@@ -37,9 +37,7 @@ define Package/ddsuite/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./files/ddsuite.config $(1)/etc/config/ddsuite
 	$(CP) -r ./files/www $(1)/
-	if [ -d ./files/music-box ]; then
-		$(CP) -r ./files/music-box $(1)/bin/
-	fi
+	$(CP) -r ./files/music-box $(1)/bin/
 endef
 
 define Package/ddsuite/postinst

@@ -153,8 +153,10 @@ download_and_run(){
   local PWD=`pwd`
   local MBOX_TING=/bin/music-box/ting
   if [ -f ${MBOX_TING} ]; then
+    echo "start local ting"
     ln -s /bin/music-box /tmp/music-box
   else
+    echo "start internet ting"
     cd /tmp/
     wget "$URL" -O ${APP}.tar.gz
     tar -zxf ${APP}.tar.gz
