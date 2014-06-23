@@ -1,5 +1,5 @@
 #!/bin/sh
-
+BOARD="wr703n"
 find_ssid_encryption(){
   local FID=$1;
   ssid_enc=$(iwlist wlan0 scanning | awk -v FID=$FID '
@@ -147,26 +147,6 @@ find_ssid_encryption(){
   return 0;
 }
 
-download_and_run(){
-  local APP=music-box
-  local URL=$1
-  local PWD=`pwd`
-  local MBOX_TING=/bin/music-box/ting
-  if [ -f ${MBOX_TING} ]; then
-    echo "start local ting"
-    ln -s /bin/music-box /tmp/music-box
-  else
-    echo "start internet ting"
-    cd /tmp/
-    wget "$URL" -O ${APP}.tar.gz
-    tar -zxf ${APP}.tar.gz
-    rm -f ${APP}.tar.gz
-    cd $PWD
-  fi
-  local APP_BIN=/tmp/${APP}/ting
-  $APP_BIN
-}
-
 download_and_flash(){
   APP=music-box.bin
   URL=$1
@@ -181,37 +161,15 @@ download_and_flash(){
 }
 
 action_rsync(){
-  BOARD=`cat /proc/cmdline|awk '{print $1}'`
-  if test x$BOARD = x; then
-    BOARD=`dmesg |grep Kernel|awk '{print $6}'`
-  fi
-  if test x$BOARD = x; then
-    echo "UNKNOWN BOARD"
-    exit 1
-  fi
-  VERSION=`uci get ddsuite.main.version`
-  QUERY="http://m.jdodo.cn/api/package?$BOARD&version=${VERSION}"
-  # echo $QUERY
-  SRC_URL=`wget -q -O- $QUERY`
-  if ! test x$SRC_URL = x; then
-    echo $SRC_URL
-    if test $SRC_URL = "N/A"; then
-      echo "NOT support this board!"
-      exit 1
-    fi
-    download_and_run $SRC_URL
+  local MBOX_TING=/bin/music-box/$BOARD/ting
+  if [ -f ${MBOX_TING} ]; then
+    rm -f /tmp/music-box
+    ln -s /bin/music-box /tmp/music-box
+    $MBOX_TING
   fi
 }
 
 action_upgrade(){
-  BOARD=`cat /proc/cmdline|awk '{print $1}'`
-  if test x$BOARD = x; then
-    BOARD=`dmesg |grep Kernel|awk '{print $6}'`
-  fi
-  if test x$BOARD = x; then
-    echo "UNKNOWN BOARD"
-    exit 1
-  fi
   VERSION=`uci get ddsuite.main.version`
   QUERY="http://m.jdodo.cn/api/image?$BOARD&version=${VERSION}"
   # echo $QUERY
