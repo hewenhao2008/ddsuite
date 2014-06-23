@@ -171,7 +171,7 @@ action_rsync(){
 
 action_upgrade(){
   VERSION=`uci get ddsuite.main.version`
-  QUERY="http://m.jdodo.cn/api/image?$BOARD&version=${VERSION}"
+  QUERY="http://m.jdodo.cn/api/image?board=$BOARD&version=${VERSION}"
   # echo $QUERY
   SRC_URL=`wget -q -O- $QUERY`
   if ! test x$SRC_URL = x; then
