@@ -165,7 +165,7 @@ action_rsync(){
   if [ -f ${MBOX_TING} ]; then
     rm -f /tmp/music-box
     ln -s /bin/music-box /tmp/music-box
-    $MBOX_TING
+    $MBOX_TING start "$BOARD"
   fi
 }
 
