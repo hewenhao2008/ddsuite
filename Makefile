@@ -16,6 +16,8 @@ include $(INCLUDE_DIR)/package.mk
 define Package/ddsuite
   CATEGORY:=Base system
   TITLE:=ddsuite for basic functional
+  DEPENDS:=+kmod-usb-audio +alsa-utils +zlib
+  URL:=http://m.jdodo.cn/
 endef
 
 define Package/ddsuite/description
