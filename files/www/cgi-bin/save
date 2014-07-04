@@ -14,36 +14,25 @@ urldecode(){
 echo "$QUERY_STRING" | awk '{split($0, a, "&"); for(i in a){split(a[i], r, "="); printf("%s=\"%s\"\n", r[1], r[2]);}}' > /tmp/ddsuite.conf
 . /tmp/ddsuite.conf
 
-if ! test x$STA_ENC = x; then
-  STA_ENC=`echo $STA_ENC|urldecode|urldecode`
-  echo "STA_ENC=\"$STA_ENC\"" > $CONF
-fi
-
 if ! test x$STA_SSID = x; then
   STA_SSID=`echo $STA_SSID|urldecode|urldecode`
-  echo "STA_SSID=\"$STA_SSID\"" >> $CONF
+  uci set ddsuite.main.ssid=$STA_SSID
 fi
 
 if ! test x$STA_KEY = x; then
   STA_KEY=`echo $STA_KEY|urldecode|urldecode`
-  echo "STA_KEY=\"$STA_KEY\"" >> $CONF
-else
-  echo "STA_KEY=\"null\"" >> $CONF  
+  uci set ddsuite.main.ssid_key=$STA_KEY
 fi
 
 if ! test x$DEV_UUID = x; then
   DEV_UUID=`echo $DEV_UUID|urldecode|urldecode`
-  echo "DEV_UUID=\"$DEV_UUID\"" >> $CONF
+  uci set ddting.main.uuid=$DEV_UUID
 else
-  echo "DEV_UUID=\"null\"" >> $CONF  
+  uci set ddting.main.uuid="null"
 fi
 
-if ! test x$DEV_PIN = x; then
-  DEV_PIN=`echo $DEV_PIN|urldecode|urldecode`
-  echo "DEV_PIN=\"$DEV_PIN\"" >> $CONF
-else
-  echo "DEV_PIN=\"null\"" >> $CONF
-fi
+uci commit ddting
+uci commit ddsuite
 
 echo "{}"
 

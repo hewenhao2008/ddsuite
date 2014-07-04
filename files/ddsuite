@@ -1,5 +1,4 @@
 #!/bin/sh
-BOARD="wr703n"
 find_ssid_encryption(){
   local FID=$1;
   ssid_enc=$(iwlist wlan0 scanning | awk -v FID=$FID '
@@ -148,32 +147,22 @@ find_ssid_encryption(){
 }
 
 download_and_flash(){
-  APP=music-box.bin
-  URL=$1
-  PWD=`pwd`
+  local APP=music-box.bin
+  local URL=$1
 
   cd /tmp/
-  wget "$URL" -O ${APP}.tar.gz
-  tar -zxf ${APP}.tar.gz
+  wget "$URL" -O -|tar -zxf -
   if [ -e ${APP} ]; then    
     mtd -r write /tmp/${APP} firmware
   fi
 }
 
-action_rsync(){
-  local MBOX_TING=/bin/music-box/$BOARD/ting
-  if [ -f ${MBOX_TING} ]; then
-    rm -f /tmp/music-box
-    ln -s /bin/music-box /tmp/music-box
-    $MBOX_TING start "$BOARD"
-  fi
-}
-
 action_upgrade(){
-  VERSION=`uci get ddsuite.main.version`
-  QUERY="http://m.jdodo.cn/api/image?board=$BOARD&version=${VERSION}"
-  # echo $QUERY
-  SRC_URL=`wget -q -O- $QUERY`
+  local BOARD=`uci get ddsuite.main.board`
+  local VERSION=`uci get ddsuite.main.version`
+  local API=`uci get ddsuite.main.image_api`
+  local QUERY="$API?board=$BOARD&version=${VERSION}"
+  local SRC_URL=`wget -q -O- $QUERY`
   if ! test x$SRC_URL = x; then
     echo $SRC_URL
     if test $SRC_URL = "N/A"; then
@@ -185,64 +174,61 @@ action_upgrade(){
 }
 
 action_wifi_sta(){
-  CONF=/etc/ddsuite/ddsuite.conf
-  if [ -e $CONF ]; then
-    echo "ddsuite.conf is exist"
-    . $CONF
-    echo $STA_SSID $STA_KEY $STA_ENC
-    find_ssid_encryption $STA_SSID
-    if ! test x$ssid_enc = x; then      
-      wifi down      
-      uci set wireless.@wifi-iface[0].network=wan
-      uci set wireless.@wifi-iface[0].mode=sta
-      if test $ssid_enc = "N/A"; then
-        uci set wireless.@wifi-iface[0].encryption=none
-        uci set wireless.@wifi-iface[0].key=
-      else
-        uci set wireless.@wifi-iface[0].encryption=$ssid_enc
-        uci set wireless.@wifi-iface[0].key=$STA_KEY
+  local STA_SSID=`uci get ddsuite.main.ssid`
+  local STA_KEY=`uci get ddsuite.main.ssid_key`
+  local GATEWAY=`route -e|grep default|awk '{print $2}'`
+  if ! test x$GATEWAY = x; then
+    echo "wifi is already associated: $GATEWAY"
+    return
+  fi
+
+  find_ssid_encryption $STA_SSID
+  if ! test x$ssid_enc = x; then
+    wifi down
+    uci set wireless.@wifi-iface[-1].network=wan
+    uci set wireless.@wifi-iface[-1].mode=sta
+    if test $ssid_enc = "N/A"; then
+      uci set wireless.@wifi-iface[-1].encryption=none
+      uci set wireless.@wifi-iface[-1].key=
+    else
+      uci set wireless.@wifi-iface[-1].encryption=$ssid_enc
+      uci set wireless.@wifi-iface[-1].key=$STA_KEY
+    fi
+    uci set wireless.@wifi-iface[-1].ssid=$STA_SSID
+    wifi up
+    uci export wireless
+    TICK=15
+    GATEWAY=
+    while : ; do
+      sleep 1
+      GATEWAY=`route -e|grep default|awk '{print $2}'`
+      TICK=$(( $TICK - 1))
+      if ! test x$GATEWAY = x; then
+         echo "wifi is associated: $GATEWAY"
+         break;
       fi
-      uci set wireless.@wifi-iface[0].ssid=$STA_SSID
+      if [ "$TICK" -eq 0 ]; then
+        echo "default gateway timeout!"
+        break;
+      fi
+    done
+    if test x${GATEWAY} = x; then
+      echo "failed to change sta mode!"
+      MAC456=`cat /sys/class/ieee80211/phy0/macaddress|awk -F ':' '{print $4$5$6}'`
+      wifi down
+      uci set wireless.@wifi-iface[0].network=lan
+      uci set wireless.@wifi-iface[0].mode=ap
+      uci set wireless.@wifi-iface[0].encryption=none
+      uci set wireless.@wifi-iface[0].ssid=musicbox-$MAC456
+      uci set wireless.@wifi-iface[0].key=
       wifi up
-      uci export wireless
-      TICK=15
-      GATEWAY=
-      while : ; do
-        sleep 1
-        GATEWAY=`route -e|grep default|awk '{print $2}'`
-        TICK=$(( $TICK - 1))
-        if ! test x$GATEWAY = x; then
-           echo "default gateway: $GATEWAY"
-           break;
-        fi
-        if [ "$TICK" -eq 0 ]; then
-          echo "default gateway timeout!"
-          break;
-        fi
-      done
-      if test x${GATEWAY} = x; then
-        echo "failed to change sta mode!"
-        MAC456=`cat /sys/class/ieee80211/phy0/macaddress|awk -F ':' '{print $4$5$6}'`
-        wifi down
-        uci set wireless.@wifi-iface[0].network=lan
-        uci set wireless.@wifi-iface[0].mode=ap
-        uci set wireless.@wifi-iface[0].encryption=none
-        uci set wireless.@wifi-iface[0].ssid=musicbox-$MAC456
-        uci set wireless.@wifi-iface[0].key=
-        wifi up
-      else
-        action_rsync
-      fi
     fi
   else
-    echo "ddsuite.conf NOT exist"
+    echo "ssid_enc is not exist"
   fi
 }
 
 case $1 in
-  rsync)
-    action_rsync
-    ;;
   upgrade)
     action_upgrade
     ;;

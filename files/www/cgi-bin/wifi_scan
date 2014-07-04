@@ -140,13 +140,10 @@ END{
 }
 ')
 
-
-DDCONF="/etc/ddsuite/ddsuite.conf"
 DEV="{}"
-
-if [ -f $DDCONF ]; then
-  . $DDCONF
-  DEV="{\"uuid\":\"$DEV_UUID\", \"pin\":\"$DEV_PIN\"}"
+UUID=`uci get ddting.main.uuid`
+if ! test x$UUID = x; then
+  DEV="{\"uuid\":\"$UUID\"}"
 fi
 
 RES="{\"ssids\":$SSIDS, \"dev\":$DEV}"
