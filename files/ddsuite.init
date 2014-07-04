@@ -1,13 +1,18 @@
 #!/bin/sh /etc/rc.common
 # Copyright (C) 2010 Jo-Philipp Wich
 
-START=50
+START=60
 
 DDSUITE_BIN="/bin/ddsuite"
 
 start() {
 	config_load ddsuite
-	$DDSUITE_BIN wifi_sta > /tmp/ddsuite.log
+  local GATEWAY=`route -e|grep default|awk '{print $2}'`
+  if test x${GATEWAY} = x; then
+    $DDSUITE_BIN wifi_sta > /tmp/ddsuite.log
+  else
+    $DDSUITE_BIN rsync > /tmp/ddsuite.log
+  fi
 }
 
 stop() {
